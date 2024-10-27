@@ -1,0 +1,21 @@
+{
+  "name": "CPU第二次作业",
+  "description": "verilog学习",
+  "type": "CPU",
+  "status": "open",
+  "id": "week-2",
+  "version": 1,
+  "config_version": 1,
+  "auto_grade": {
+    "enable": false,
+    "upload_output": true, 
+    "steps": [
+      {
+        "title": "Step 1",
+        "timeout": 60,
+        "command": "echo 'Hello, World!'",
+        "score": 100
+      }
+    ]
+  }
+}
