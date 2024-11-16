@@ -1,131 +1,95 @@
 `timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 2024/11/16 13:21:25
+// Design Name: 
+// Module Name: testbench
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
 
-module tb_top();
 
-reg         clk;
+module testbench;
+    reg clk;  // 时钟信号
+    reg [4:0] raddr1;  // 读地址1
+    wire [31:0] rdata1;  // 读数据1
+    reg [4:0] raddr2;  // 读地址2
+    wire [31:0] rdata2;  // 读数据2
+    reg we;  // 写使能
+    reg [4:0] waddr;  // 写地址
+    reg [31:0] wdata;  // 写数据
 
-reg  [ 4:0] raddr1;
-wire [31:0] rdata1;
-reg  [ 4:0] raddr2;
-wire [31:0] rdata2;
-reg         we;
-reg  [ 4:0] waddr;
-reg  [31:0] wdata;
+    // 实例化寄存器堆模块
+    regfile uut (
+        .clk(clk),
+        .raddr1(raddr1),
+        .rdata1(rdata1),
+        .raddr2(raddr2),
+        .rdata2(rdata2),
+        .we(we),
+        .waddr(waddr),
+        .wdata(wdata)
+    );
 
-reg  [ 3:0] task_phase;
+    // 时钟信号生成
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;  // 每5个时间单位翻转一次时钟信号
+    end
 
-regfile u_regfile(
-    .clk      (clk       ),
-    .raddr1   (raddr1    ),
-    .rdata1   (rdata1    ),
-    .raddr2   (raddr2    ),
-    .rdata2   (rdata2    ),
-    .we       (we        ),
-    .waddr    (waddr     ),
-    .wdata    (wdata     ) 
-);
+    initial begin
+        // 初始化输入
+        we = 0;
+        raddr1 = 5'b00000;
+        raddr2 = 5'b00001;
+        waddr = 5'b00000;
+        wdata = 32'h00000000;
 
-//clk
-initial 
-begin
-    clk = 1'b1;
-end
-always #5 clk = ~clk;
-					
-initial 
-begin
-    raddr1 =  5'd0;
-    raddr2 =  5'd0;
-	waddr  =  5'd0;
-	wdata  = 32'd0;
-	we     =  1'd0;
-	task_phase =  4'd0;
-	#2000;
-	
-	$display("=============================");
-	$display("Test Begin");
-	#1;
-	// Part 0 Begin
-	#10;
-	task_phase = 4'd0;
-	we         = 1'b0;
-	waddr      = 5'd1;
-	wdata      = 32'hffffffff;
-    raddr1     = 5'd1;
-    #10;
-	we         = 1'b1;
-	waddr      = 5'd1;
-	wdata      = 32'h1111ffff;
-    #10;
-	we         = 1'b0;
-    raddr1     = 5'd2;
-    raddr2     = 5'd1;
-	#10;
-    raddr1     = 5'd1;
-    
-    #200;
-    // Part 1 Begin
-    #10;
-	task_phase = 4'd1;
-	we         = 1'b1;
-	wdata      = 32'h0000ffff;
-	waddr      =  5'h10;
-    raddr1     =  5'h10;
-    raddr2     =  5'h0f;
-	#10;
-	wdata      = 32'h1111ffff;
-	waddr      =  5'h11;
-    raddr1     =  5'h11;
-    raddr2     =  5'h10;
-	#10;
-	wdata      = 32'h2222ffff;
-	waddr      =  5'h12;
-    raddr1     =  5'h12;
-    raddr2     =  5'h11;
-	#10;
-	wdata      = 32'h3333ffff;
-	waddr      =  5'h13;
-    raddr1     =  5'h13;
-    raddr2     =  5'h12;
-	#10;
-	wdata      = 32'h4444ffff;
-	waddr      =  5'h14;
-    raddr1     =  5'h14;
-    raddr2     =  5'h13;
-	#10;
-    raddr1     =  5'h15;
-    raddr2     =  5'h14;
-	#10;
+        // 写入数据
+        #10;
+        we = 1;
+        waddr = 5'b00000;
+        wdata = 32'h12345678;
+        #10;
+        we = 0;
 
-    #200;
-	// Part 2 Begin
-	#10;
-	task_phase = 4'd2;
-	we         = 1'b1;
-    raddr1     =  5'h10;
-    raddr2     =  5'h0f;
-	#10;
-    raddr1     =  5'h11;
-    raddr2     =  5'h10;
-	#10;
-    raddr1     =  5'h12;
-    raddr2     =  5'h11;
-	#10;
-    raddr1     =  5'h13;
-    raddr2     =  5'h12;
-	#10;
-    raddr1     =  5'h14;
-    raddr2     =  5'h13;
-	#10;
-	
-	#50;
-	$display("TEST END");
-	$finish;
-end
+        // 读取数据
+        #10;
+        raddr1 = 5'b00000;
+        raddr2 = 5'b00001;
+        #10;
+        $display("Read Address 1: %b, Data: %h", raddr1, rdata1);
+        $display("Read Address 2: %b, Data: %h", raddr2, rdata2);
 
-	initial begin
-		$dumpfile("rf.vcd");
-		$dumpvars(0, u_regfile); 
-	end
+        // 写入另一个数据
+        #10;
+        we = 1;
+        waddr = 5'b00001;
+        wdata = 32'h87654321;
+        #10;
+        we = 0;
 
+        // 再次读取数据
+        #10;
+        raddr1 = 5'b00000;
+        raddr2 = 5'b00001;
+        #10;
+        $display("Read Address 1: %b, Data: %h", raddr1, rdata1);
+        $display("Read Address 2: %b, Data: %h", raddr2, rdata2);
+
+        // 结束仿真
+        $finish;
+    end
 endmodule
+
